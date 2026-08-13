@@ -1,0 +1,20 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssignmentSystem.Api", "backend\AssignmentSystem.Api\AssignmentSystem.Api.csproj", "{7B1507AD-6030-4EBC-A82E-1A7272C33980}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AssignmentSystem.Tests", "backend\AssignmentSystem.Tests\AssignmentSystem.Tests.csproj", "{5C123916-62A6-4201-9188-D14247107B55}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7B1507AD-6030-4EBC-A82E-1A7272C33980}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B1507AD-6030-4EBC-A82E-1A7272C33980}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C123916-62A6-4201-9188-D14247107B55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C123916-62A6-4201-9188-D14247107B55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+EndGlobal
