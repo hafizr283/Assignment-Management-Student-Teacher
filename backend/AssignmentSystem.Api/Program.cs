@@ -8,12 +8,16 @@ using AssignmentSystem.Api.Models;
 using AssignmentSystem.Api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+var platformPort = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrWhiteSpace(platformPort)) builder.WebHost.UseUrls($"http://0.0.0.0:{platformPort}");
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key is required.");
-builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(builder.Configuration.GetConnectionString("Default")));
+var databaseConnection = GetDatabaseConnection(builder.Configuration);
+builder.Services.AddDbContext<AppDbContext>(o => o.UseNpgsql(databaseConnection));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(o => o.TokenValidationParameters = new TokenValidationParameters
 {
     ValidateIssuer = true, ValidateAudience = true, ValidateLifetime = true, ValidateIssuerSigningKey = true,
@@ -21,6 +25,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)), ClockSkew = TimeSpan.FromMinutes(1)
 });
 builder.Services.AddAuthorization();
+builder.Services.Configure<ForwardedHeadersOptions>(o =>
+{
+    o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    o.KnownNetworks.Clear();
+    o.KnownProxies.Clear();
+});
 builder.Services.ConfigureHttpJsonOptions(o => o.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(o =>
@@ -34,6 +44,7 @@ builder.Services.AddCors(o => o.AddPolicy("frontend", p => p.WithOrigins(builder
 var app = builder.Build();
 var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
 Directory.CreateDirectory(uploadsPath);
+app.UseForwardedHeaders();
 app.UseExceptionHandler(handler => handler.Run(async context =>
 {
     var exception = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
@@ -42,6 +53,7 @@ app.UseExceptionHandler(handler => handler.Run(async context =>
     await context.Response.WriteAsJsonAsync(new { data = (object?)null, error = new { code, message = exception?.Message ?? "Unexpected server error." } });
 }));
 app.UseSwagger(); app.UseSwaggerUI(); app.UseStaticFiles(new StaticFileOptions { FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath), RequestPath = "/uploads" }); app.UseCors("frontend"); app.UseAuthentication(); app.UseAuthorization();
+app.MapGet("/healthz", () => Results.Ok(new { status = "ok" }));
 
 app.MapPost("/api/auth/login", async (LoginRequest request, AppDbContext db, IConfiguration config) =>
 {
@@ -134,6 +146,23 @@ static IQueryable<AssignmentResponse> AssignmentList(IQueryable<Assignment> q, i
 static IQueryable<SubmissionResponse> SubmissionList(IQueryable<Submission> q) => q.OrderByDescending(x => x.UpdatedAtUtc).Select(x => new SubmissionResponse(x.Id, x.AssignmentId, x.Assignment.Title, x.Assignment.MaximumMarks, x.StudentId, x.Student.Name, x.Answer, x.FileUrl, x.VersionNumber, x.IsLate, x.SubmittedAtUtc, x.UpdatedAtUtc, x.Marks, x.Feedback, x.Status.ToString(), x.GradedAtUtc, x.GradedBy != null ? x.GradedBy.Name : null));
 static int UserId(ClaimsPrincipal p) => int.Parse(p.FindFirstValue(ClaimTypes.NameIdentifier)!);
 static Task<bool> Teaches(AppDbContext db, int teacherId, int courseId, int subjectId) => db.TeacherCourses.AnyAsync(x => x.TeacherId == teacherId && x.CourseId == courseId && x.SubjectId == subjectId);
+static string GetDatabaseConnection(IConfiguration config)
+{
+    var value = config.GetConnectionString("Default") ?? config["DATABASE_URL"];
+    if (string.IsNullOrWhiteSpace(value)) throw new InvalidOperationException("A PostgreSQL connection string is required.");
+    if (!Uri.TryCreate(value, UriKind.Absolute, out var uri) || uri.Scheme is not ("postgres" or "postgresql")) return value;
+    var userInfo = uri.UserInfo.Split(':', 2, StringSplitOptions.None);
+    var builder = new Npgsql.NpgsqlConnectionStringBuilder
+    {
+        Host = uri.Host,
+        Port = uri.Port > 0 ? uri.Port : 5432,
+        Database = uri.AbsolutePath.Trim('/'),
+        Username = userInfo.Length > 0 ? Uri.UnescapeDataString(userInfo[0]) : null,
+        Password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : null,
+        SslMode = Npgsql.SslMode.Require
+    };
+    return builder.ConnectionString;
+}
 static Assignment MapAssignment(AssignmentRequest r, int teacherId) => new() { Title = r.Title, Description = r.Description, DeadlineUtc = r.DeadlineUtc.ToUniversalTime(), MaximumMarks = r.MaximumMarks, CourseId = r.CourseId, SubjectId = r.SubjectId, Status = r.Status, AllowUpdates = r.AllowUpdates, AllowLateSubmission = r.AllowLateSubmission, TeacherId = teacherId };
 static void ApplyAssignment(Assignment x, AssignmentRequest r) { x.Title = r.Title; x.Description = r.Description; x.DeadlineUtc = r.DeadlineUtc.ToUniversalTime(); x.MaximumMarks = r.MaximumMarks; x.CourseId = r.CourseId; x.SubjectId = r.SubjectId; x.Status = r.Status; x.AllowUpdates = r.AllowUpdates; x.AllowLateSubmission = r.AllowLateSubmission; x.UpdatedAtUtc = DateTime.UtcNow; }
 

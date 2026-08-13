@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: assignment-management-api
+    runtime: docker
+    dockerfilePath: ./backend/AssignmentSystem.Api/Dockerfile
+    dockerContext: ./backend/AssignmentSystem.Api
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__Default
+        fromDatabase:
+          name: assignment-management-db
+          property: connectionString
+      - key: Jwt__Key
+        generateValue: true
+      - key: Jwt__Issuer
+        value: AssignmentSystem
+      - key: Jwt__Audience
+        value: AssignmentSystemClient
+      - key: FrontendUrl
+        sync: false
+
+databases:
+  - name: assignment-management-db
+    databaseName: assignment_system
+    user: assignment_system_user
