@@ -1,5 +1,14 @@
 # Fix log
 
+## Simple website UX pass (2026-08-14)
+
+- Loaded and applied the project `SKILL.md` across the frontend, API, validation, tests, and documentation.
+- Replaced browser prompt workflows with labeled in-page forms for grading, deadline changes, users, courses, subjects, enrollment, and teacher assignment.
+- Added responsive mobile tables/forms/navigation, visible keyboard focus, reduced-motion support, loading/empty/error/success states, session-expiry handling, retry feedback, and accessible route-level error/not-found pages.
+- Added structured request validation, active-account JWT checks, deterministic ordering, safer assignment update rules, signature-checked uploads, protected error details, and the Render configuration-reload workaround.
+- Upgraded the frontend to Next.js 16.3.1 with ESLint 9.39.1; production dependency audit reports 0 vulnerabilities.
+- Verified: `npm run lint` passes with 0 warnings, `npm run build` passes, backend Release tests pass 26/26, `git diff --check` passes, and Admin/Teacher/Student authenticated read-path smoke tests pass against PostgreSQL.
+
 ## Current expansion status (2026-08-14)
 
 - Completed: upgraded the simple implementation to the requested full workflow while preserving existing data and integer IDs.
@@ -30,3 +39,5 @@
 | File requirement was metadata-only | Added authenticated multipart upload with type allow-list and 10 MB server limit, served from `/uploads`. |
 | Teacher submissions screen hid submitted answers and attachments | Production API verification confirmed the teacher receives both fields. Added a submitted-work column with wrapped answer text, image previews, and links for images/documents. |
 | Production upload durability on Render | Verified the current uploaded JPEG returns HTTP 200. Render's local filesystem remains ephemeral, so uploads can disappear after a restart or redeploy; durable production storage still requires object storage. |
+
+website is deployed on link https://assignment-management-student-teach.vercel.app/

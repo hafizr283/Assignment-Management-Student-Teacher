@@ -4,60 +4,44 @@ This document maps the recruitment assignment requirements to this project and g
 
 ## Short answer
 
-Git alone is not enough. The evaluator expects an accessible GitHub/GitLab repository containing the complete application, database setup files, tests, README, demo credentials, and an environment-variable example. This project already contains those application pieces, but you still need to create or use a repository whose root is **this folder** and perform a final clean run-through.
+The project now has a dedicated GitHub repository rooted at this folder. Before submission, push the final verified changes and confirm the repository and live application are accessible from a signed-out browser.
 
 ## Requirement audit
 
 | Requirement | Current status | Evidence / action |
 | --- | --- | --- |
-| GitHub/GitLab repository link | **Needs final setup** | The current Git root is `E:\`, and its remote points to an unrelated GPU repository. Do not use that repository for this project. Create a repository rooted at `E:\job_project\asp.net` or upload this folder to a new repository. |
+| GitHub/GitLab repository link | Ready, push final changes | Git root: `E:\job_project\asp.net`; remote: `https://github.com/hafizr283/Assignment-Management-Student-Teacher`. |
 | Complete frontend code | Ready | `frontend/` contains the Next.js, React, TypeScript, validation, and API integration code. |
 | Complete backend/API code | Ready | `backend/AssignmentSystem.Api/` contains the ASP.NET Core API, authentication, authorization, validation, Swagger, migrations, seed logic, and uploads. |
 | PostgreSQL database files | Ready | `backend/AssignmentSystem.Api/Data/Migrations/`, `database/create-database.sql`, and `backend/AssignmentSystem.Api/Services/SeedData.cs` are included. |
 | README | Ready | `README.md` documents features, structure, setup, credentials, assumptions, and limitations. |
 | Demo credentials | Ready | Admin, Teacher, and Student credentials are listed in `README.md` and seeded by `SeedData.cs`. |
-| Environment configuration | Ready | `frontend/.env.example` is present. Do not commit real deployment secrets. The development values in `appsettings.json` must be replaced for deployment. |
+| Environment configuration | Ready | Frontend and backend examples are in `frontend/.env.example` and `backend/AssignmentSystem.Api/.env.example`. Do not commit real deployment secrets. |
 | Easy local setup | Ready, verify once | Follow the exact commands in `README.md`; start PostgreSQL before starting the API. |
 | JWT and role authorization | Ready | Implemented in `Program.cs` and endpoint authorization/ownership checks. |
-| Unit tests | Ready | `dotnet test AssignmentSystem.sln` passes 13 tests when the project-local .NET SDK variables are set. |
-| Frontend production build | Verify in a clean process | Stop old Next.js processes before `npm run build`; multiple processes sharing `.next` can make the build hang. |
+| Unit tests | Re-run after final backend changes | Run `dotnet test AssignmentSystem.sln` with the .NET 8 SDK and confirm every test passes. |
+| Frontend production build | Re-run after the dependency upgrade | Run `npm run build` with the committed Next.js version and confirm the main, not-found, and favicon routes are generated. |
 
-## Important Git warning
+## Repository status
 
-From this folder, `git rev-parse --show-toplevel` currently reports `E:\`. That means commands such as `git add .` can see unrelated directories elsewhere on the drive. The existing remote also points to an unrelated repository. Do not commit or push from that Git context.
+Verified on 14 August 2026:
 
-Use a new repository for this project. The safest option is to create an empty repository on GitHub or GitLab first, then run the following commands from this folder:
+- Git root: `E:\job_project\asp.net`
+- Branch: `main`
+- Remote: `https://github.com/hafizr283/Assignment-Management-Student-Teacher.git`
+- Live application: `https://assignment-management-student-teach.vercel.app/`
+
+Inspect and push the final project changes from this folder:
 
 ```powershell
 Set-Location E:\job_project\asp.net
-
-# Confirm this is the project folder before initializing Git.
-Get-ChildItem README.md, AssignmentSystem.sln, backend, frontend, database
-
-git init
-git branch -M main
-git add .
 git status --short
-git commit -m "Complete assignment management system"
-
-# Replace this URL with the new, empty repository URL.
-git remote add origin https://github.com/<your-account>/<new-repository>.git
+git diff --check
+git add README.md SUBMISSION_CHECKLIST.md backend database frontend AssignmentSystem.sln render.yaml .gitignore
+git status --short
+git commit -m "Polish assignment management UX and documentation"
 git push -u origin main
 ```
-
-If `git remote add origin` says that `origin` already exists, inspect it first:
-
-```powershell
-git remote -v
-```
-
-Only if it is the new project repository should you keep it. Otherwise change it explicitly:
-
-```powershell
-git remote set-url origin https://github.com/<your-account>/<new-repository>.git
-```
-
-Before pushing, check that the staged file list contains only this project. It should include files under `backend/`, `frontend/`, `database/`, plus the solution, README, and documentation. It should not include unrelated folders such as `GPU_Programming_Essentials`, `xampp`, or other directories under `E:\`.
 
 ## Final local verification
 
@@ -86,7 +70,7 @@ dotnet restore AssignmentSystem.sln
 dotnet test AssignmentSystem.sln
 ```
 
-Expected result: all tests pass. The current project has 13 business-rule tests.
+Expected result: all tests pass.
 
 ### 3. Start and inspect the API
 
@@ -156,7 +140,6 @@ Do not include generated or machine-local files. The existing `.gitignore` exclu
 1. Stop duplicate local API/Next.js processes if present.
 2. Start PostgreSQL and run the smoke test.
 3. Run `dotnet test` and `npm run build`.
-4. Initialize/push a **new project-specific Git repository**.
+4. Commit and push the final changes to the existing project repository.
 5. Test the pushed repository URL from a clean view.
 6. Submit that URL through the provided form.
-

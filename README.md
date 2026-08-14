@@ -2,10 +2,15 @@
 
 Full-stack implementation of the recruitment assignment. It supports Admin, Teacher, and Student roles with JWT authentication, PostgreSQL persistence, assignment publishing/archiving, late submissions, versioned resubmission, revision requests, grading, feedback, and file uploads.
 
+## Live demo
+
+- Web application: https://assignment-management-student-teach.vercel.app/
+- Source repository: https://github.com/hafizr283/Assignment-Management-Student-Teacher
+
 ## Stack
 
 - Backend: ASP.NET Core 8 minimal API, EF Core, PostgreSQL/Npgsql, JWT, Swagger
-- Frontend: Next.js 14, React, TypeScript, Zod validation, responsive CSS
+- Frontend: Next.js 16, React, TypeScript, Zod validation, responsive CSS
 - Tests: xUnit business-rule tests
 
 ## Main features
@@ -19,39 +24,47 @@ Full-stack implementation of the recruitment assignment. It supports Admin, Teac
 
 `backend/AssignmentSystem.Api` contains the API, entities, migrations, uploads, seed data, and workflow rules. `backend/AssignmentSystem.Tests` covers deadline, late submission, revision, validation, authorization, and grading rules. `frontend` contains the responsive Next.js client.
 
-## Run locally (all files stay on E:)
+## Run locally
 
-1. Install PostgreSQL and create a database named `assignment_system` (or edit the connection string in `backend/AssignmentSystem.Api/appsettings.json`). Docker is optional.
-2. In PowerShell from this folder:
+Prerequisites: .NET 8 SDK, Node.js 20 or newer, npm, and PostgreSQL.
+
+1. Create the database as a PostgreSQL superuser:
 
 ```powershell
-$env:TEMP = "$PWD\.tmp"; $env:TMP = "$PWD\.tmp"; $env:NUGET_PACKAGES = "$PWD\.packages\nuget"
-$env:Path = "$PWD\.dotnet-sdk;$env:Path"
+psql -U postgres -f database/create-database.sql
+```
+
+2. Configure the API connection and JWT secret. The committed `appsettings.json` values are development placeholders; environment variables override them:
+
+```powershell
+$env:ConnectionStrings__Default = 'Host=localhost;Port=5432;Database=assignment_system;Username=postgres;Password=<your-password>'
+$env:Jwt__Key = '<at-least-32-random-characters>'
+```
+
+The backend variables are also listed in `backend/AssignmentSystem.Api/.env.example`.
+
+3. Restore, test, and run the API from the repository root:
+
+```powershell
 dotnet restore AssignmentSystem.sln
 dotnet test AssignmentSystem.sln
 dotnet run --project backend/AssignmentSystem.Api --launch-profile http
 ```
 
-The API and Swagger are at http://localhost:5080/swagger.
+The API and Swagger UI are at http://localhost:5080/swagger.
 
-3. In a second PowerShell window:
+4. In a second PowerShell window, configure and run the frontend:
 
 ```powershell
 Set-Location frontend
-$env:npm_config_cache = "$PWD\..\.cache\npm"
+Copy-Item .env.example .env.local
 npm install
 npm run dev
 ```
 
-The frontend is at http://localhost:3000. Copy `.env.example` to `.env.local` if the API URL differs.
+The frontend is at http://localhost:3000. Edit `.env.local` if the API URL differs from the example.
 
-The API applies the included migration and seeds demo data on startup. No manual table creation is needed. `database/create-database.sql` is an optional one-command database creation script.
-
-For this workspace, a portable PostgreSQL 16 instance is already installed at `.postgres`, stores data at `.postgres-data`, and runs from E: on port 5432. Start it again with:
-
-```powershell
-& "$PWD\.postgres\pgsql\bin\pg_ctl.exe" -D "$PWD\.postgres-data" -l "$PWD\.tmp\postgres-server.log" -o '-p 5432' start
-```
+The API applies the included migrations and seeds demo data on startup. `database/create-database.sql` only creates the database; no manual table creation is needed.
 
 ## Demo credentials
 
@@ -68,7 +81,7 @@ For this workspace, a portable PostgreSQL 16 instance is already installed at `.
 - The development JWT key and database password are placeholders and must be replaced for deployment.
 - The API uses UTC timestamps and rejects late work unless the assignment enables it.
 - Integer IDs are retained for compatibility with the initial database; this does not affect ownership/security rules.
-- Notifications, plagiarism detection, antivirus scanning, refresh tokens, pagination, and live deployment remain out of scope.
+- Notifications, plagiarism detection, antivirus scanning, refresh tokens, and pagination remain out of scope.
 
 ## Deploying publicly (recommended: Render + Vercel)
 

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Classroom Hub">
+  <rect width="64" height="64" rx="16" fill="#176b4c"/>
+  <path d="M46 42.1A18 18 0 1 1 46 21l-6.8 5a9.5 9.5 0 1 0 0 11.2l6.8 4.9Z" fill="#fff"/>
+  <path d="M39 18h7v28h-7V35h-8v11h-7V18h7v10h8V18Z" fill="#dff1e8"/>
+</svg>

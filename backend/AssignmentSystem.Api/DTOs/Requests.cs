@@ -3,49 +3,68 @@ using AssignmentSystem.Api.Models;
 
 namespace AssignmentSystem.Api.DTOs;
 
-public record LoginRequest([Required, EmailAddress] string Email, [Required] string Password);
+public record LoginRequest(
+    [property: Required, EmailAddress, StringLength(254)] string Email,
+    [property: Required, StringLength(128)] string Password);
 
 public record UserRequest(
-    [Required, StringLength(100)] string Name,
-    [Required, EmailAddress] string Email,
-    [Required, MinLength(8)] string Password,
-    UserRole Role,
+    [property: Required, StringLength(100)] string Name,
+    [property: Required, EmailAddress, StringLength(254)] string Email,
+    [property: Required, StringLength(128, MinimumLength = 8)] string Password,
+    [property: EnumDataType(typeof(UserRole))] UserRole Role,
+    [property: Range(1, int.MaxValue)]
     int? CourseId,
     bool IsActive = true);
 
 public record UserUpdateRequest(
-    [Required, StringLength(100)] string Name,
-    [Required, EmailAddress] string Email,
-    [MinLength(8)] string? Password,
-    UserRole Role,
+    [property: Required, StringLength(100)] string Name,
+    [property: Required, EmailAddress, StringLength(254)] string Email,
+    [property: StringLength(128, MinimumLength = 8)] string? Password,
+    [property: EnumDataType(typeof(UserRole))] UserRole Role,
+    [property: Range(1, int.MaxValue)]
     int? CourseId,
     bool IsActive = true);
 
-public record CatalogRequest([Required, StringLength(100)] string Name);
-public record SubjectRequest([Required, StringLength(100)] string Name, int CourseId);
-public record TeacherAssignmentRequest(int TeacherId, int CourseId, int SubjectId);
-public record EnrollmentRequest(int StudentId, int CourseId);
+public record CatalogRequest([property: Required, StringLength(100)] string Name);
+public record SubjectRequest([property: Required, StringLength(100)] string Name, [property: Range(1, int.MaxValue)] int CourseId);
+public record TeacherAssignmentRequest([property: Range(1, int.MaxValue)] int TeacherId, [property: Range(1, int.MaxValue)] int CourseId, [property: Range(1, int.MaxValue)] int SubjectId);
+public record EnrollmentRequest([property: Range(1, int.MaxValue)] int StudentId, [property: Range(1, int.MaxValue)] int CourseId);
 
 public record AssignmentRequest(
-    [Required, StringLength(200)] string Title,
-    [Required, StringLength(10000)] string Description,
+    [property: Required, StringLength(200)] string Title,
+    [property: Required, StringLength(10000)] string Description,
     DateTime DeadlineUtc,
-    [Range(1, 1000)] int MaximumMarks,
-    int CourseId,
-    int SubjectId,
-    AssignmentStatus Status,
+    [property: Range(1, 1000)] int MaximumMarks,
+    [property: Range(1, int.MaxValue)] int CourseId,
+    [property: Range(1, int.MaxValue)] int SubjectId,
+    [property: EnumDataType(typeof(AssignmentStatus))] AssignmentStatus Status,
     bool AllowUpdates = true,
     bool AllowLateSubmission = false);
 
 public record SubmissionRequest(
-    [StringLength(10000)] string? Answer,
-    [Url, StringLength(500)] string? FileUrl);
+    [property: StringLength(10000)] string? Answer,
+    [property: HttpUrl, StringLength(500)] string? FileUrl);
 
 public record GradeRequest(
-    [Range(0, 1000)] int Marks,
-    [StringLength(4000)] string? Feedback);
+    [property: Range(0, 1000)] int Marks,
+    [property: StringLength(4000)] string? Feedback);
 
-public record SubmissionStatusRequest(SubmissionStatus Status);
+public record SubmissionStatusRequest([property: EnumDataType(typeof(SubmissionStatus))] SubmissionStatus Status);
+
+public sealed class HttpUrlAttribute : ValidationAttribute
+{
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        if (value is null || value is string { Length: 0 })
+            return ValidationResult.Success;
+
+        return value is string text &&
+               Uri.TryCreate(text, UriKind.Absolute, out var uri) &&
+               (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+            ? ValidationResult.Success
+            : new ValidationResult("File URL must start with http:// or https://.", [validationContext.MemberName!]);
+    }
+}
 
 public record AssignmentSubmissionResponse(int Id, string Answer, string? FileUrl, int VersionNumber, bool IsLate, string Status, int? Marks, string? Feedback, DateTime UpdatedAtUtc);
 public record AssignmentResponse(int Id, string Title, string Description, DateTime DeadlineUtc, int MaximumMarks, string Status, bool AllowUpdates, bool AllowLateSubmission, bool IsArchived, int TeacherId, int CourseId, int SubjectId, string Course, string Subject, string Teacher, AssignmentSubmissionResponse? Submission);
