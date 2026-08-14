@@ -6,6 +6,7 @@ Full-stack implementation of the recruitment assignment. It supports Admin, Teac
 
 - Web application: https://assignment-management-student-teach.vercel.app/
 - Source repository: https://github.com/hafizr283/Assignment-Management-Student-Teacher
+- Reviewer instructions: [REVIEWER_GUIDE.md](REVIEWER_GUIDE.md)
 
 ## Stack
 

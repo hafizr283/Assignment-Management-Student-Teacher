@@ -19,8 +19,8 @@ The project now has a dedicated GitHub repository rooted at this folder. Before 
 | Environment configuration | Ready | Frontend and backend examples are in `frontend/.env.example` and `backend/AssignmentSystem.Api/.env.example`. Do not commit real deployment secrets. |
 | Easy local setup | Ready, verify once | Follow the exact commands in `README.md`; start PostgreSQL before starting the API. |
 | JWT and role authorization | Ready | Implemented in `Program.cs` and endpoint authorization/ownership checks. |
-| Unit tests | Re-run after final backend changes | Run `dotnet test AssignmentSystem.sln` with the .NET 8 SDK and confirm every test passes. |
-| Frontend production build | Re-run after the dependency upgrade | Run `npm run build` with the committed Next.js version and confirm the main, not-found, and favicon routes are generated. |
+| Unit tests | Verified | 26 backend tests pass in Release configuration. |
+| Frontend production build | Verified | Next.js 16 production build and ESLint pass; the main, not-found, and favicon routes are generated. |
 
 ## Repository status
 
@@ -120,6 +120,7 @@ Include:
 - `database/create-database.sql`
 - `AssignmentSystem.sln`
 - `README.md`
+- `REVIEWER_GUIDE.md`
 - `fixlog.md` and this checklist (useful documentation)
 - `frontend/.env.example`
 - EF Core migration files and seed data
