@@ -1,6 +1,6 @@
 # Fix log
 
-## Current expansion status (2026-08-13)
+## Current expansion status (2026-08-14)
 
 - Completed: upgraded the simple implementation to the requested full workflow while preserving existing data and integer IDs.
 - Backend: active users, course-linked subjects, enrollment, teacher assignment, late submissions, archive/publish, versioning, authenticated file upload, grading audit, revision reopening, ownership checks, and DTO responses.
@@ -28,3 +28,5 @@
 | Next.js build waited indefinitely | Existing dev server owned `.next`; stopped only its Node processes, built successfully, then restarted it. |
 | Graded students could resubmit | Graded/reviewed submissions are locked until the teacher sets `NeedsRevision`. |
 | File requirement was metadata-only | Added authenticated multipart upload with type allow-list and 10 MB server limit, served from `/uploads`. |
+| Teacher submissions screen hid submitted answers and attachments | Production API verification confirmed the teacher receives both fields. Added a submitted-work column with wrapped answer text, image previews, and links for images/documents. |
+| Production upload durability on Render | Verified the current uploaded JPEG returns HTTP 200. Render's local filesystem remains ephemeral, so uploads can disappear after a restart or redeploy; durable production storage still requires object storage. |
