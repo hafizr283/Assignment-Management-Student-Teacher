@@ -2,6 +2,7 @@ services:
   - type: web
     name: assignment-management-api
     runtime: docker
+    plan: free
     dockerfilePath: ./backend/AssignmentSystem.Api/Dockerfile
     dockerContext: ./backend/AssignmentSystem.Api
     healthCheckPath: /healthz
@@ -24,5 +25,6 @@ services:
 
 databases:
   - name: assignment-management-db
+    plan: free
     databaseName: assignment_system
     user: assignment_system_user
